@@ -14,9 +14,9 @@ public class DungeonSetup : MonoBehaviour
     void Start()
     {
         northOn = true;
-        southOn = false;
+        southOn = true;
         eastOn = true;
-        westOn = false;
+        westOn = true;
 
         
         if(northOn != true)
