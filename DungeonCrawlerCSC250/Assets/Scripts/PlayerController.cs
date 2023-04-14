@@ -7,139 +7,124 @@ public class PlayerController : MonoBehaviour
 {
     private Rigidbody rb;
     public GameObject northExit, southExit, eastExit, westExit;
+    public GameObject westStart, eastStart, northStart, southStart;
     public float movementSpeed = 40.0f;
-    public bool movement;
-    public Vector3 middleVector;
-    public Vector3 southVector;
-    public Vector3 northVector;
-    public Vector3 westVector;
-    public Vector3 eastVector;
-    
+    private bool isMoving;
 
     // Start is called before the first frame update
     void Start()
     {
         this.rb = this.GetComponent<Rigidbody>();
-        print(MasterData.count);
-        MasterData md = new MasterData();
-        movement = true;
+        this.isMoving = false;
 
-        this.middleVector = new Vector3(0.00f,1.00f,0.00f);
-        this.southVector = new Vector3(0.00f,1.00f,-3.00f);
-        this.northVector = new Vector3(0.00f,1.00f,3.00f);
-        this.westVector = new Vector3(-3.00f,1.00f,0.00f);
-        this.eastVector = new Vector3(3.00f,1.00f,0.00f);
-
+        if (!MasterData.whereDidIComeFrom.Equals("?"))
+        {
+            if(MasterData.whereDidIComeFrom.Equals("north"))
+            {
+                this.gameObject.transform.position = this.southExit.transform.position;
+                this.rb.AddForce(Vector3.forward * 150.0f);
+            }
+            else if (MasterData.whereDidIComeFrom.Equals("south"))
+            {
+                this.gameObject.transform.position = this.northExit.transform.position;
+                this.rb.AddForce(Vector3.back * 150.0f);
+            }
+            else if (MasterData.whereDidIComeFrom.Equals("west"))
+            {
+                this.gameObject.transform.position = this.eastExit.transform.position;
+                this.rb.AddForce(Vector3.left * 150.0f);
+            }
+            else if (MasterData.whereDidIComeFrom.Equals("east"))
+            {
+                this.gameObject.transform.position = this.westExit.transform.position;
+                this.rb.AddForce(Vector3.right * 150.0f);
+            }
+        }
         
-            if(MasterData.whereDidIComeFrom == "north")
-            {
-                transform.position = southVector;
-                this.rb.AddForce(new Vector3(0.00f,1.00f,3.00f)* movementSpeed);
-            }
-            if(MasterData.whereDidIComeFrom == "south")
-            {
-                transform.position = northVector;
-                this.rb.AddForce(new Vector3(0.00f,1.00f,-3.00f)* movementSpeed);
-            }
-            if(MasterData.whereDidIComeFrom == "west")
-            {
-                transform.position = eastVector;
-                this.rb.AddForce(new Vector3(-3.00f,1.00f,0.00f)* movementSpeed);
-            }
-            if(MasterData.whereDidIComeFrom == "east")
-            {
-                transform.position = westVector;
-                this.rb.AddForce(new Vector3(3.00f,1.00f,0.00f)* movementSpeed);
-            }
-
-
+     
     }
-        
-           
-            
- 
 
-    // Update is called once per frame
-    void Update()
+    private void OnTriggerEnter(Collider other)
     {
-        if(movement == true)
+        if(other.gameObject.CompareTag("center"))
         {
-        if(Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            this.rb.AddForce(this.northExit.transform.position * movementSpeed);
-            movement = false;
+            this.rb.velocity = Vector3.zero;
+            this.rb.Sleep();
+            //this.rb.angularVelocity = Vector3.zero;
         }
-        if(Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            this.rb.AddForce(this.westExit.transform.position * movementSpeed);
-            movement = false;
-        }
-        if(Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            this.rb.AddForce(this.southExit.transform.position * movementSpeed);
-            movement = false;
-        }
-        if(Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            this.rb.AddForce(this.eastExit.transform.position * movementSpeed);
-            movement = false;
-        }
-        }
-        
-    
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if(other.gameObject.CompareTag("Exit"))
+        if(other.gameObject.CompareTag("Exit") && MasterData.isExiting)
         {
             if(other.gameObject == this.northExit)
             {
                 MasterData.whereDidIComeFrom = "north";
-                MasterData.count++;
-                movement = true;
-                MasterData.atMiddle = false;
-                SceneManager.LoadScene("DungeonRoom");                    
             }
-            if(other.gameObject == this.southExit)
+            else if (other.gameObject == this.southExit)
             {
                 MasterData.whereDidIComeFrom = "south";
-                MasterData.count++;
-                movement = true;
-                MasterData.atMiddle = false;
-                SceneManager.LoadScene("DungeonRoom");
             }
-            if(other.gameObject == this.eastExit)
+            else if (other.gameObject == this.eastExit)
             {
                 MasterData.whereDidIComeFrom = "east";
-                MasterData.count++;
-                movement = true;
-                MasterData.atMiddle = false;
-                SceneManager.LoadScene("DungeonRoom");
             }
-            if(other.gameObject == this.westExit)
+            else if (other.gameObject == this.westExit)
             {
                 MasterData.whereDidIComeFrom = "west";
-                MasterData.count++;
-                movement = true;
-                MasterData.atMiddle = false;
-                SceneManager.LoadScene("DungeonRoom");
             }
-             
+            MasterData.isExiting = false;
+            MasterData.p.getCurrentRoom().takeExit(MasterData.p, MasterData.whereDidIComeFrom);
+
+            SceneManager.LoadScene("DungeonRoom");
+        }
+        else if(other.gameObject.CompareTag("Exit") && !MasterData.isExiting)
+        {
+            MasterData.isExiting = true;
         }
     }
 
-
-    private void OnTriggerEnter(Collider other)
+    // Update is called once per frame
+    void Update()
     {
-        if(MasterData.atMiddle == false)
+        
+        if(MasterData.canGoNorth == true)
         {
-        if(other.gameObject.CompareTag("Middle"))
+        if(Input.GetKeyDown(KeyCode.UpArrow) && this.isMoving == false)
         {
-            MasterData.atMiddle = true;
-            MasterData.whereDidIComeFrom = "?";
-            SceneManager.LoadScene("DungeonRoom");
+            this.rb.AddForce(this.northExit.transform.position * movementSpeed);
+            this.isMoving = true;
         }
         }
+
+
+        if(MasterData.canGoWest == true)
+        {
+        if(Input.GetKeyDown(KeyCode.LeftArrow) && this.isMoving == false)
+        {
+            this.rb.AddForce(this.westExit.transform.position * movementSpeed);
+            this.isMoving = true;
+        }
+        }
+
+        if(MasterData.canGoEast == true)
+        {
+        if (Input.GetKeyDown(KeyCode.RightArrow) && this.isMoving == false)
+        {
+            this.rb.AddForce(this.eastExit.transform.position * movementSpeed);
+            this.isMoving = true;
+        }
+        }
+
+        if(MasterData.canGoSouth == true)
+        {
+        if (Input.GetKeyDown(KeyCode.DownArrow) && this.isMoving == false)
+        {
+            this.rb.AddForce(this.southExit.transform.position * movementSpeed);
+            this.isMoving = true;
+        }
+        }
+
     }
 }

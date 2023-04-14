@@ -718,13 +718,11 @@ MonoBehaviour:
   southExit: {fileID: 1176212465}
   eastExit: {fileID: 219035431}
   westExit: {fileID: 1208212764}
+  westStart: {fileID: 0}
+  eastStart: {fileID: 0}
+  northStart: {fileID: 0}
+  southStart: {fileID: 0}
   movementSpeed: 40
-  movement: 0
-  middleVector: {x: 0, y: 0, z: 0}
-  southVector: {x: 0, y: 0, z: 0}
-  northVector: {x: 0, y: 0, z: 0}
-  westVector: {x: 0, y: 0, z: 0}
-  eastVector: {x: 0, y: 0, z: 0}
 --- !u!135 &1726116827
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -928,7 +926,7 @@ GameObject:
   - component: {fileID: 1797999771}
   m_Layer: 0
   m_Name: Middle
-  m_TagString: Middle
+  m_TagString: center
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
